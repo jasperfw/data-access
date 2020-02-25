@@ -1,0 +1,33 @@
+{
+  "name": "jasperfw/data-access",
+  "description": "Database Access Library",
+  "license": "Apache-2.0",
+  "authors": [
+    {
+      "name": "William Eldridge",
+      "homepage": "http://wigedev.net"
+    }
+  ],
+  "require": {
+    "ext-pdo": "*",
+    "jasperfw/core": "dev-master",
+    "php": "^7.2",
+    "psr/log": "1.0.*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "~8.0"
+  },
+  "suggest": {
+    "ext=ldap": "Required for using LDAP database connections"
+  },
+  "autoload": {
+    "psr-4": {
+      "JasperFW\\DataAccess\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "JasperFW\\DataAccessTest\\": "tests/"
+    }
+  }
+}
