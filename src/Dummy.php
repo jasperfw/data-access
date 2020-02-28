@@ -2,7 +2,6 @@
 
 namespace JasperFW\DataAccess;
 
-use Exception;
 use JasperFW\DataAccess\Exception\DatabaseConnectionException;
 use JasperFW\DataAccess\Exception\DatabaseQueryException;
 use JasperFW\DataAccess\ResultSet\ResultSet;
@@ -52,7 +51,7 @@ class Dummy extends DAO
      * @param array           $config Configuration settings for the connection this object represents
      * @param LoggerInterface $logger Logging system
      *
-     * @throws Exception
+     * @throws DatabaseConnectionException
      */
     public function __construct(array $config = [], LoggerInterface $logger = null)
     {

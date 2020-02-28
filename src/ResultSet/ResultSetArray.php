@@ -2,7 +2,6 @@
 
 namespace JasperFW\DataAccess\ResultSet;
 
-use Exception;
 use JasperFW\DataAccess\Exception\DatabaseQueryException;
 
 /**
@@ -23,7 +22,6 @@ class ResultSetArray extends ResultSet
      *
      * @return ResultSet|void
      * @throws DatabaseQueryException
-     * @throws Exception
      */
     public function execute(array $params): ?ResultSet
     {

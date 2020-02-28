@@ -47,7 +47,7 @@ abstract class DAO
      * @param array                $configuration The configuration for the connection
      * @param LoggerInterface|null $logger        The error and debug logger
      *
-     * @throws Exception
+     * @throws DatabaseConnectionException if a connection to the database can not be established
      */
     public function __construct(array $configuration, ?LoggerInterface $logger = null)
     {
@@ -58,7 +58,7 @@ abstract class DAO
             }
         } catch (Exception $e) {
             $this->logger->error('A problem was found in the configuration. ' . $e->getMessage());
-            throw $e;
+            throw new DatabaseConnectionException($e->getMessage());
         }
     }
 

@@ -2,7 +2,6 @@
 
 namespace JasperFW\DataAccess\ResultSet;
 
-use Exception;
 use Iterator;
 use JasperFW\DataAccess\DAO;
 use JasperFW\DataAccess\Exception\DatabaseQueryException;
@@ -50,7 +49,6 @@ abstract class ResultSet implements Iterator
      *
      * @return ResultSet|null
      * @throws DatabaseQueryException
-     * @throws Exception
      */
     abstract public function execute(array $params): ?ResultSet;
 
