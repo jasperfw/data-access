@@ -2,7 +2,6 @@
 
 namespace JasperFW\DataAccess;
 
-use Exception;
 use JasperFW\DataAccess\Exception\DatabaseConnectionException;
 use JasperFW\DataAccess\Exception\DatabaseQueryException;
 use JasperFW\DataAccess\Exception\TransactionErrorException;
@@ -85,7 +84,7 @@ class MsSQL extends DAO
             );
             $this->dbconn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->logger->debug('Connected to database engine.');
-            $this->is_connected = true;
+            $this->isConnected = true;
         } catch (Exception $e) {
             throw new DatabaseConnectionException(
                 'MSSQL Connection to <strong>' .
@@ -106,7 +105,7 @@ class MsSQL extends DAO
             $this->dbconn->rollBack();
         }
         $this->dbconn = null;
-        $this->is_connected = false;
+        $this->isConnected = false;
     }
 
     /**
@@ -157,65 +156,21 @@ class MsSQL extends DAO
     }
 
     /**
-     * Execute a query with the passed options. Typically the options array will include a params subarray to run the
-     * query as a prepared statement.
-     *
-     * @param string $query_string
-     * @param array  $params
-     * @param array  $options
-     *
-     * @return DAO
-     * @throws DatabaseConnectionException
-     * @throws DatabaseQueryException
-     */
-    public function query(string $query_string, array $params = [], array $options = []): DAO
-    {
-        // Reset in case a previous query was attempted.
-        $this->querySucceeded = false;
-
-        // Connect to the database
-        if (!$this->is_connected) {
-            $this->connect();
-        }
-
-        // Get the query string and params
-        $query_params = [];
-        if (isset($options['params'])) {
-            $query_params = $options['params'];
-        }
-
-        try {
-            $stmt = $this->getStatement($query_string);
-            $this->stmt = $stmt;
-            $stmt->execute($query_params);
-        } catch (Exception $e) {
-            throw new DatabaseQueryException(
-                $e->getMessage() . '|| QUERY: ' . $query_string . '|| PARAMS: ' . implode(
-                    ';',
-                    $query_params
-                )
-            );
-        }
-
-        return $this;
-    }
-
-    /**
      * Returns a statement object representing a prepared statement for the database.
      *
-     * @param string $query_string The query
+     * @param string $queryString The query
      *
      * @return ResultSet
      * @throws DatabaseConnectionException
      * @throws DatabaseQueryException
      */
-    public function getStatement(string $query_string): ResultSet
+    public function getStatement(string $queryString): ResultSet
     {
         // Connect to the database
-        if (!$this->is_connected) {
+        if (!$this->isConnected) {
             $this->connect();
         }
-        $stmt = $this->dbconn->prepare($query_string, [PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL]);
+        $stmt = $this->dbconn->prepare($queryString, [PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL]);
         if (false === $stmt) {
             // The statement could not be prepared, return an appropriate exception
             throw new DatabaseQueryException('The query could not be prepared. ' . $this->dbconn->errorInfo()[2]);
@@ -272,12 +227,12 @@ class MsSQL extends DAO
      * Escapes the passed column name according to the rules for the database engine. This replaces the static method
      * because unit tests can't mock the static method.
      *
-     * @param string $column_name
+     * @param string $columnName
      *
      * @return string
      */
-    public function escapeColName(string $column_name): string
+    public function escapeColName(string $columnName): string
     {
-        return '[' . $column_name . ']';
+        return '[' . $columnName . ']';
     }
 }

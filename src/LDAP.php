@@ -2,7 +2,6 @@
 
 namespace JasperFW\DataAccess;
 
-use Exception;
 use JasperFW\DataAccess\Exception\DatabaseConnectionException;
 use JasperFW\DataAccess\Exception\DatabaseQueryException;
 use JasperFW\DataAccess\Exception\TransactionsNotSupportedException;
@@ -35,7 +34,7 @@ class LDAP extends DAO
      * @param array           $config Configuration settings for the connection this object represents
      * @param LoggerInterface $logger The log manager
      *
-     * @throws Exception
+     * @throws DatabaseConnectionException
      */
     public function __construct(array $config, LoggerInterface $logger = null)
     {
@@ -47,7 +46,6 @@ class LDAP extends DAO
      *
      * @return mixed
      * @throws DatabaseConnectionException
-     * @throws Exception
      */
     public function connect(): void
     {
@@ -61,7 +59,7 @@ class LDAP extends DAO
             $this->logger->info('Connected to LDAP');
             $this->handle = $handle;
             $this->logger->info('Connected to LDAP');
-            $this->is_connected = true;
+            $this->isConnected = true;
         } else {
             throw new DatabaseConnectionException('Unable to connect to LDAP');
         }
@@ -73,7 +71,7 @@ class LDAP extends DAO
     public function disconnect(): void
     {
         $this->handle = false;
-        $this->is_connected = false;
+        $this->isConnected = false;
     }
 
     /**
@@ -113,30 +111,28 @@ class LDAP extends DAO
      * Execute a query with the passed options. Typically the options array will include a params subarray to run the
      * query as a prepared statement.
      *
-     * @param string $query_string
+     * @param string $queryString
      * @param array  $params
      * @param array  $options
      *
      * @return DAO
      * @throws DatabaseConnectionException
      * @throws DatabaseQueryException
-     * @throws DatabaseConnectionException
-     * @throws Exception
      * @noinspection PhpComposerExtensionStubsInspection
      */
-    public function query(string $query_string, array $params = [], array $options = []): DAO
+    public function query(string $queryString, array $params = [], array $options = []): DAO
     {
         // Set success to failure
         $this->querySucceeded = false;
 
         // Check if a connection has been established
-        if (!$this->is_connected) {
+        if (!$this->isConnected) {
             $this->connect();
         }
         // Perform the query
         $attributes = isset($options['attributes']) ? $options['attributes'] : [];
-        $result = ldap_search($this->handle, $this->configuration['base_dn'], $query_string, $attributes);
-        //\Framework::i()->log->info('LDAP Query: ' . $query_string);
+        $result = ldap_search($this->handle, $this->configuration['base_dn'], $queryString, $attributes);
+        //\Framework::i()->log->info('LDAP Query: ' . $queryString);
         if (!is_resource($result)) {
             $this->logger->info('LDAP search failed: ' . ldap_err2str(ldap_errno($this->handle)));
             throw new DatabaseQueryException('LDAP Search failed.');
@@ -232,11 +228,10 @@ class LDAP extends DAO
      *
      * @return bool
      * @throws DatabaseConnectionException If connection with the autnentication server fails
-     * @throws Exception
      */
     public function authenticateUser(string $domain, string $username, string $password): bool
     {
-        if (!$this->is_connected) {
+        if (!$this->isConnected) {
             $this->connect();
         }
         $this->logger->debug('Attempting to authenticate ' . $username . '@' . $domain);
@@ -280,17 +275,17 @@ class LDAP extends DAO
      */
     public function __destruct()
     {
-        // TODO: Implement __destruct() method.
+        $this->disconnect();
     }
 
     /**
      * Returns a statement object representing a prepared statement for the database. Not supported for LDAP
      *
-     * @param string $query_string The query
+     * @param string $queryString The query
      *
      * @return ResultSet
      */
-    public function getStatement(string $query_string): ?ResultSet
+    public function getStatement(string $queryString): ?ResultSet
     {
         return null;
     }

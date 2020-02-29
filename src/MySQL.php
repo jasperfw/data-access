@@ -36,7 +36,7 @@ class MySQL extends DAO
      * @param array           $config
      * @param LoggerInterface $logger
      *
-     * @throws Exception
+     * @throws DatabaseConnectionException
      */
     public function __construct(array $config, LoggerInterface $logger = null)
     {
@@ -70,7 +70,7 @@ class MySQL extends DAO
                 [PDO::ATTR_PERSISTENT => true, PDO::ATTR_ERRMODE => PDO::ERRMODE_SILENT]
             );
             $this->logger->debug('Connected to database engine.');
-            $this->is_connected = true;
+            $this->isConnected = true;
         } catch (Exception $e) {
             $errorMessage = 'MySQL Connection to <strong>' . $dsn . '</strong> failed!';
             $this->logger->warning($errorMessage, [$e->getMessage()]);
@@ -83,11 +83,11 @@ class MySQL extends DAO
      */
     public function disconnect()
     {
-        if ($this->is_connected && $this->dbconn->inTransaction()) {
+        if ($this->isConnected && $this->dbconn->inTransaction()) {
             $this->dbconn->rollBack();
         }
         $this->dbconn = null;
-        $this->is_connected = false;
+        $this->isConnected = false;
     }
 
     /**
@@ -138,64 +138,21 @@ class MySQL extends DAO
     }
 
     /**
-     * Sets up the query to run. This has not been tested yet.
-     *
-     * @param string $query_string string to be set as prepare statment for the database. Use :{paramname}
-     * @param array  $params       The parameters for the query
-     * @param array  $options      driver options for the prepare statment
-     *
-     * @return DAO
-     * @throws DatabaseQueryException*@throws DatabaseConnectionException
-     * @throws DatabaseConnectionException
-     */
-    public function query(string $query_string, array $params = [], array $options = []): DAO
-    {
-        // Reset in case a previous query was attempted.
-        $this->querySucceeded = false;
-
-        // Connect to the database
-        if (!$this->is_connected) {
-            $this->connect();
-        }
-
-        // Get the query string and params
-        $query_params = [];
-        if (isset($options['params'])) {
-            $query_params = $options['params'];
-        }
-
-        try {
-            $stmt = $this->getStatement($query_string);
-            $this->stmt = $stmt;
-            $stmt->execute($query_params);
-        } catch (Exception $e) {
-            throw new DatabaseQueryException(
-                $e->getMessage() . '|| QUERY: ' . $query_string . '|| PARAMS: ' . implode(
-                    ';',
-                    $query_params
-                )
-            );
-        }
-
-        return $this;
-    }
-
-    /**
      * Returns a statement object representing a prepared statement for the database.
      *
-     * @param string $query_string The query
+     * @param string $queryString The query
      *
      * @return ResultSet
      * @throws DatabaseConnectionException
      * @throws DatabaseQueryException
      */
-    public function getStatement(string $query_string): ResultSet
+    public function getStatement(string $queryString): ResultSet
     {
         // Connect to the database
-        if (!$this->is_connected) {
+        if (!$this->isConnected) {
             $this->connect();
         }
-        $stmt = $this->dbconn->prepare($query_string, [PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL]);
+        $stmt = $this->dbconn->prepare($queryString, [PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL]);
         if (false === $stmt) {
             // The statement could not be prepared, return an appropriate exception
             throw new DatabaseQueryException('The query could not be prepared. ' . $this->dbconn->errorInfo()[2]);

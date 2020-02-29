@@ -69,7 +69,7 @@ class Dummy extends DAO
      */
     public function setFailConnectionFailed(bool $failConnectionFailed = true): void
     {
-        $this->is_connected = false;
+        $this->isConnected = false;
         $this->failConnectionFailed = $failConnectionFailed;
     }
 
@@ -107,7 +107,7 @@ class Dummy extends DAO
         if ($this->failConnectionFailed) {
             throw new DatabaseConnectionException('Unable to connect to the database!');
         }
-        $this->is_connected = true;
+        $this->isConnected = true;
         return true;
     }
 
@@ -118,7 +118,7 @@ class Dummy extends DAO
      */
     public function disconnect(): bool
     {
-        $this->is_connected = false;
+        $this->isConnected = false;
         return true;
     }
 
@@ -126,7 +126,7 @@ class Dummy extends DAO
      * Execute a query with the passed options. Typically the options array will include a params subarray to run the
      * query as a prepared statement.
      *
-     * @param string $query_string
+     * @param string $queryString
      * @param array  $params
      * @param array  $options
      *
@@ -134,13 +134,13 @@ class Dummy extends DAO
      * @throws DatabaseConnectionException
      * @throws DatabaseQueryException
      */
-    public function query(string $query_string, array $params = [], array $options = []): DAO
+    public function query(string $queryString, array $params = [], array $options = []): DAO
     {
-        $this->query = $query_string;
+        $this->query = $queryString;
         if (isset($options['params'])) {
             $this->params = $options['params'];
         }
-        if (!$this->is_connected) {
+        if (!$this->isConnected) {
             $this->connect();
         }
         if ($this->failQueryFailed) {
@@ -204,13 +204,13 @@ class Dummy extends DAO
      * Escapes the passed column name according to the rules for the database engine. This replaces the static method
      * because unit tests can't mock the static method.
      *
-     * @param string $column_name
+     * @param string $columnName
      *
      * @return string
      */
-    public function escapeColName(string $column_name): string
+    public function escapeColName(string $columnName): string
     {
-        return '[' . $column_name . ']';
+        return '[' . $columnName . ']';
     }
 
     /**
@@ -218,7 +218,7 @@ class Dummy extends DAO
      */
     public function __destruct()
     {
-        $this->is_connected = false;
+        $this->isConnected = false;
         $this->querySucceeded = false;
         $this->testData = null;
     }
@@ -226,11 +226,11 @@ class Dummy extends DAO
     /**
      * Returns a statement object representing a prepared statement for the database.
      *
-     * @param string $query_string The query
+     * @param string $queryString The query
      *
      * @return ResultSet
      */
-    public function getStatement(string $query_string): ResultSet
+    public function getStatement(string $queryString): ResultSet
     {
         return new ResultSetArray($this->testData, $this, $this->logger);
     }

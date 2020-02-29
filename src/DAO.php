@@ -4,6 +4,7 @@ namespace JasperFW\DataAccess;
 
 use Exception;
 use JasperFW\DataAccess\Exception\DatabaseConnectionException;
+use JasperFW\DataAccess\Exception\DatabaseQueryException;
 use JasperFW\DataAccess\Exception\TransactionsNotSupportedException;
 use JasperFW\DataAccess\ResultSet\ResultSet;
 use PDOStatement;
@@ -20,7 +21,7 @@ use Psr\Log\NullLogger;
 abstract class DAO
 {
     /** @var bool True if the connection has been established */
-    protected $is_connected = false;
+    protected $isConnected = false;
     /** @var array The configuration file for this database connection */
     protected $configuration;
     /** @var LoggerInterface The logger for recording errors and debug information */
@@ -117,22 +118,46 @@ abstract class DAO
      * Execute a query with the passed options. Typically the options array will include a params subarray to run the
      * query as a prepared statement.
      *
-     * @param string $query_string
-     * @param array  $params
-     * @param array  $options
+     * @param string $queryString The query to be sent
+     * @param array  $params      Query parameters
+     * @param array  $options     Additional arguments
      *
      * @return DAO
+     * @throws DatabaseQueryException
+     * @noinspection PhpUnusedParameterInspection Parameter is for future use
      */
-    abstract public function query(string $query_string, array $params = [], array $options = []): self;
+    public function query(string $queryString, array $params = [], array $options = []): self
+    {
+        // Reset in case a previous query was attempted.
+        $this->querySucceeded = false;
+        // Connect to the database
+        if (!$this->isConnected) {
+            $this->connect();
+        }
+        // Get the query string and params
+        try {
+            $stmt = $this->getStatement($queryString);
+            $this->stmt = $stmt;
+            $stmt->execute($params);
+        } catch (Exception $e) {
+            throw new DatabaseQueryException(
+                $e->getMessage() . '|| QUERY: ' . $queryString . '|| PARAMS: ' . implode(
+                    ';',
+                    $params
+                )
+            );
+        }
+        return $this;
+    }
 
     /**
      * Returns a statement object representing a prepared statement for the database.
      *
-     * @param string $query_string The query
+     * @param string $queryString The query
      *
      * @return ResultSet
      */
-    abstract public function getStatement(string $query_string): ?ResultSet;
+    abstract public function getStatement(string $queryString): ?ResultSet;
 
     /**
      * Returns true if the previous query succeeded
@@ -164,13 +189,13 @@ abstract class DAO
      * Escapes the passed column name according to the rules for the database engine. This replaces the static method
      * because unit tests can't mock the static method.
      *
-     * @param string $column_name
+     * @param string $columnName
      *
      * @return string
      */
-    public function escapeColName(string $column_name): string
+    public function escapeColName(string $columnName): string
     {
-        return '`' . $column_name . '`';
+        return '`' . $columnName . '`';
     }
 
     /**
@@ -193,7 +218,7 @@ abstract class DAO
      */
     public function isConnected(): bool
     {
-        return $this->is_connected;
+        return $this->isConnected;
     }
 
     /**
@@ -264,17 +289,27 @@ abstract class DAO
     }
 
     /**
-     * Returns a database engine specific pagination snippet for inclusion in a query.
+     * Returns a database engine specific pagination snippet for inclusion in a query. If the page is null, this will
+     * simply return a limit without an offset. If the pageSize is null or 0, no snippet will be returned (empty string)
+     * as this would cause the query to affect 0 records
      *
-     * @param int $page      The page in the result set to request
-     * @param int $page_size The number of results in a page
+     * @param int $pageSize The number of results in a page
+     * @param int $page     The page in the result set to request
      *
-     * @return string
+     * @return string The SQL snippet
      */
-    public function generatePagination(int $page = null, int $page_size = null): string
+    public function generatePagination(int $pageSize = null, int $page = null): string
     {
-        //TODO: This
-        return '';
+        $paging = '';
+        if (null === $pageSize || 0 == $pageSize || 1 === $pageSize) {
+            return $paging;
+        }
+        $paging .= 'LIMIT ';
+        if (null != $page && 0 != $page && 1 !== $page) {
+            $offset = ($page * $pageSize) - $pageSize;
+            $paging .= $offset . ', ';
+        }
+        return $paging . $pageSize;
     }
 
     /**
