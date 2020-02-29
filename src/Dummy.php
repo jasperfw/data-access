@@ -19,7 +19,7 @@ use Psr\Log\LoggerInterface;
  *
  * To simulate a query failure, call the setFailureQuery(true) before the operation is attempted.
  *
- * @package JasperFW\DataModeling\DataAccess
+ * @package JasperFW\\DataAccess
  */
 class Dummy extends DAO
 {

@@ -7,7 +7,7 @@ namespace JasperFW\DataAccess;
  *
  * This class is a wrapper for CURL functionality
  *
- * @package JasperFW\DataModeling\DataAccess
+ * @package JasperFW\\DataAccess
  */
 class Curl
 {

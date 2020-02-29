@@ -21,7 +21,7 @@ use Psr\Log\LoggerInterface;
  *
  * TODO: This needs to be completed.
  *
- * @package JasperFW\DataModeling\DataAccess
+ * @package JasperFW\\DataAccess
  */
 class DB2 extends DAO
 {

@@ -15,7 +15,7 @@ use Psr\Log\NullLogger;
  *
  * Parent class for database connections.
  *
- * @package JasperFW\DataModeling\DataAccess
+ * @package JasperFW\\DataAccess
  */
 abstract class DAO
 {
