@@ -109,7 +109,7 @@ abstract class DAO
      *
      * @return bool
      */
-    public function inTrasaction(): bool
+    public function inTransaction(): bool
     {
         return $this->inTransaction;
     }
