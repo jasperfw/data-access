@@ -1,7 +1,5 @@
 # Jasper FW - Data Access
 
-Current Stability: **Beta**
-
 The Data Access Library provides wrappers for interacting with MySQL, SQL Server, SQLite and more coming soon.
 
 The included database connection wrappers mostly wrap PDO drivers. However, some drivers wrap alternative drivers (such
@@ -19,7 +17,7 @@ results of queries against a wide variety of data sources with a simple, uniform
 # Instructions
 
 ## Installation
-Install using composer `composer require "jasperfw\data-access"`
+Install using composer `composer require "jasperfw/data-access"`
 
 ## Basic Usage
 ### Establish a database connection
