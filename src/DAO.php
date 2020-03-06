@@ -28,6 +28,8 @@ abstract class DAO
     protected $logger;
     /** @var bool True if there is an active transaction */
     protected $inTransaction = false;
+    /** @var bool True if the last query succeeded */
+    protected $querySucceeded = false;
 
     /**
      * Escapes the column names. Generally this is done by surrounding the column name with backticks.
