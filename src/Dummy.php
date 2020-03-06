@@ -25,11 +25,11 @@ class Dummy extends DAO
 {
     public $query = null;
     public $params = null;
-    private $querySucceeded = false;
-    private $testData = null;
-    private $result = null;
-    private $failConnectionFailed = false;
-    private $failQueryFailed = false;
+    protected $querySucceeded = false;
+    protected $testData = null;
+    protected $result = null;
+    protected $failConnectionFailed = false;
+    protected $failQueryFailed = false;
 
     /**
      * Escapes the column names. Generally this is done by surrounding the column name with backticks.
