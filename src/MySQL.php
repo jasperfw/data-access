@@ -24,11 +24,9 @@ use Psr\Log\LoggerInterface;
 class MySQL extends DAO
 {
     /** @var PDO connection to server */
-    private $dbconn;
+    protected $dbconn;
     /** @var null|ResultSetPDO Returned query results */
-    private $stmt;
-    /** @var bool True if the query succeeded, false otherwise */
-    private $querySucceeded = false;
+    protected $stmt;
 
     /**
      * MySQL constructor.
