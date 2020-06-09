@@ -60,18 +60,23 @@ class MySQL extends DAO
         $this->logger->debug('Connecting to database engine.');
         $user = $this->configuration['username'];
         $pwd = $this->configuration['password'];
+        $options = [PDO::ATTR_PERSISTENT => true, PDO::ATTR_ERRMODE => PDO::ERRMODE_SILENT];
+        if (isset($this->configuration['options'])) {
+            $options = array_merge($options, $this->configuration['options']);
+        }
         try {
             $this->dbconn = new PDO(
                 $dsn,
                 $user,
                 $pwd,
-                [PDO::ATTR_PERSISTENT => true, PDO::ATTR_ERRMODE => PDO::ERRMODE_SILENT]
+                $options
             );
             $this->logger->debug('Connected to database engine.');
             $this->isConnected = true;
         } catch (Exception $e) {
+            var_dump($e);
             $errorMessage = 'MySQL Connection to <strong>' . $dsn . '</strong> failed!';
-            $this->logger->warning($errorMessage, [$e->getMessage()]);
+            $this->logger->warning($errorMessage . ' ' . $e->getMessage(), [$e->getMessage()]);
             throw new DatabaseConnectionException($errorMessage);
         }
     }
