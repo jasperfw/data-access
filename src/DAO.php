@@ -126,7 +126,6 @@ abstract class DAO
      *
      * @return DAO
      * @throws DatabaseQueryException
-     * @noinspection PhpUnusedParameterInspection Parameter is for future use
      */
     public function query(string $queryString, array $params = [], array $options = []): self
     {
@@ -185,7 +184,7 @@ abstract class DAO
     /**
      * Get the last inserted id for the last query run on this connection.
      */
-    abstract public function lastInsertId(): int;
+    abstract public function lastInsertId(): ?int;
 
     /**
      * Escapes the passed column name according to the rules for the database engine. This replaces the static method

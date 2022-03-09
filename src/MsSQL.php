@@ -2,6 +2,7 @@
 
 namespace JasperFW\DataAccess;
 
+use Exception;
 use JasperFW\DataAccess\Exception\DatabaseConnectionException;
 use JasperFW\DataAccess\Exception\DatabaseQueryException;
 use JasperFW\DataAccess\Exception\TransactionErrorException;
@@ -23,9 +24,9 @@ use Psr\Log\LoggerInterface;
 class MsSQL extends DAO
 {
     /** @var PDO connection to server */
-    protected $dbconn;
+    protected PDO $dbconn;
     /** @var ResultSetPDO|null Returned query object */
-    protected $stmt = null;
+    protected ?ResultSet $stmt = null;
     /** @var bool True if the last query attempted succeeded */
     protected $querySucceeded = false;
 
@@ -46,10 +47,9 @@ class MsSQL extends DAO
      * Generates the object. This does not connect to the server - that should be done only by the query function so
      * that connections are only loaded if they are being used.
      *
-     * @param array           $config Configuration settings for the connection this object represents
-     * @param LoggerInterface $logger The log system
+     * @param array                $config Configuration settings for the connection this object represents
+     * @param LoggerInterface|null $logger The log system
      *
-     * @throws Exception
      */
     public function __construct(array $config, LoggerInterface $logger = null)
     {
@@ -218,7 +218,7 @@ class MsSQL extends DAO
      *
      * @return int
      */
-    public function lastInsertId(string $name = null): int
+    public function lastInsertId(string $name = null): ?int
     {
         return $this->dbconn->lastInsertId($name);
     }

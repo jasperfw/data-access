@@ -2,8 +2,6 @@
 
 namespace JasperFW\DataAccess\ResultSet;
 
-use JasperFW\DataAccess\Exception\DatabaseQueryException;
-
 /**
  * Class ResultSetArray
  *
@@ -18,10 +16,9 @@ class ResultSetArray extends ResultSet
      * Rerun a query using the prepared statement. This is more efficent than creating new prepared statements when
      * doing bulk operations.
      *
-     * @param $params
+     * @param array $params
      *
      * @return ResultSet|void
-     * @throws DatabaseQueryException
      */
     public function execute(array $params): ?ResultSet
     {
@@ -45,7 +42,7 @@ class ResultSetArray extends ResultSet
      *
      * @return array|bool Returns the current result row.
      */
-    public function fetch()
+    public function fetch(): array|bool
     {
         return $this->result[$this->pointer++] ?? false;
     }

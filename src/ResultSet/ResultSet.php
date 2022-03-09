@@ -5,8 +5,10 @@ namespace JasperFW\DataAccess\ResultSet;
 use Iterator;
 use JasperFW\DataAccess\DAO;
 use JasperFW\DataAccess\Exception\DatabaseQueryException;
+use JetBrains\PhpStorm\Pure;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Traversable;
 
 /**
  * Class ResultSet
@@ -18,22 +20,22 @@ use Psr\Log\NullLogger;
  */
 abstract class ResultSet implements Iterator
 {
-    /** @var bool|\Traversable|array|resource The result set */
+    /** @var bool|Traversable|array|resource The result set */
     protected $result;
-    protected $pointer;
-    protected $errorCode;
-    protected $errorMessage;
-    /** @var LoggerInterface */
-    protected $logger;
+    protected int $pointer;
+    protected int $errorCode;
+    protected string $errorMessage;
+    /** @var LoggerInterface|NullLogger */
+    protected LoggerInterface|NullLogger $logger;
     /** @var DAO Reference to the database connection that this was created for */
-    protected $dbc;
+    protected DAO $dbc;
 
     /**
-     * @param \Traversable|bool|array|resource $result
-     * @param DAO                              $dbc
-     * @param null|LoggerInterface             $logger
+     * @param Traversable|bool|array $result
+     * @param DAO                    $dbc
+     * @param null|LoggerInterface   $logger
      */
-    public function __construct($result, DAO $dbc, ?LoggerInterface $logger = null)
+    #[Pure] public function __construct(Traversable|bool|array $result, DAO $dbc, ?LoggerInterface $logger = null)
     {
         $this->result = $result;
         $this->pointer = 0;
@@ -65,7 +67,7 @@ abstract class ResultSet implements Iterator
      *
      * @return array|bool Returns the current result row.
      */
-    abstract public function fetch();
+    abstract public function fetch(): bool|array;
 
     /**
      * Checks if current position is valid
@@ -153,7 +155,7 @@ abstract class ResultSet implements Iterator
     /**
      * Returns the traversable result object, usually a PDOStatement
      */
-    public function getResultObject()
+    public function getResultObject(): Traversable|bool|array
     {
         return $this->result;
     }

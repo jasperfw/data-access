@@ -7,6 +7,7 @@ use JasperFW\DataAccess\Exception\DatabaseQueryException;
 use JasperFW\DataAccess\Exception\TransactionsNotSupportedException;
 use JasperFW\DataAccess\ResultSet\ResultSet;
 use JasperFW\DataAccess\ResultSet\ResultSetArray;
+use LDAP\Connection;
 use PDOStatement;
 use Psr\Log\LoggerInterface;
 
@@ -22,19 +23,18 @@ class LDAP extends DAO
 {
     /** @var bool True if the last query succeeded */
     protected $querySucceeded = false;
-    /** @var resource The ldap connection handle */
-    protected $handle;
+    /** @var Connection|null The ldap connection handle */
+    protected ?Connection $handle;
     /** @var ResultSet The result */
-    protected $result;
+    protected ResultSet $result;
 
     /**
      * Generates the object. This does not connect to the server - that should be done only by the query function so
      * that connections are only loaded if they are being used.
      *
-     * @param array           $config Configuration settings for the connection this object represents
-     * @param LoggerInterface $logger The log manager
+     * @param array                $config Configuration settings for the connection this object represents
+     * @param LoggerInterface|null $logger The log manager
      *
-     * @throws DatabaseConnectionException
      */
     public function __construct(array $config, LoggerInterface $logger = null)
     {
@@ -44,8 +44,7 @@ class LDAP extends DAO
     /**
      * Establish a connection to the database server.
      *
-     * @return mixed
-     * @throws DatabaseConnectionException
+     * @return void
      */
     public function connect(): void
     {
@@ -53,7 +52,7 @@ class LDAP extends DAO
         // Connect to the LDAP server
         $handle = ldap_connect($this->configuration['server'], $this->configuration['port']);
 
-        if (is_resource($handle)) {
+        if ($handle !== false) {
             ldap_set_option($handle, LDAP_OPT_PROTOCOL_VERSION, 3);
             ldap_set_option($handle, LDAP_OPT_REFERRALS, 0);
             $this->logger->info('Connected to LDAP');
@@ -70,7 +69,7 @@ class LDAP extends DAO
      */
     public function disconnect(): void
     {
-        $this->handle = false;
+        $this->handle = null;
         $this->isConnected = false;
     }
 
@@ -130,15 +129,14 @@ class LDAP extends DAO
             $this->connect();
         }
         // Perform the query
-        $attributes = isset($options['attributes']) ? $options['attributes'] : [];
+        $attributes = $options['attributes'] ?? [];
         $result = ldap_search($this->handle, $this->configuration['base_dn'], $queryString, $attributes);
         //\Framework::i()->log->info('LDAP Query: ' . $queryString);
-        if (!is_resource($result)) {
+        if ($result === false) {
             $this->logger->info('LDAP search failed: ' . ldap_err2str(ldap_errno($this->handle)));
             throw new DatabaseQueryException('LDAP Search failed.');
         }
         $this->result = new ResultSetArray(ldap_get_entries($this->handle, $result), $this, $this->logger);
-        // Update the success status
         $this->querySucceeded = true;
         return $this;
     }
@@ -156,7 +154,7 @@ class LDAP extends DAO
     /**
      * Gets the results and a multidimensional array.
      *
-     * @return array|null The results as an array or null if this was not a select or if there was an error.
+     * @return array The results as an array or null if this was not a select or if there was an error.
      */
     public function toArray(): array
     {
@@ -176,7 +174,7 @@ class LDAP extends DAO
     /**
      * This is not supported by LDAP
      */
-    public function lastInsertId(): int
+    public function lastInsertId(): ?int
     {
         return null;
     }
@@ -184,12 +182,12 @@ class LDAP extends DAO
     /**
      * LDAP doesn't support pagination.
      *
-     * @param int $page      The page in the result set to request
-     * @param int $page_size The number of results in a page
+     * @param int|null $pageSize The number of results in a page
+     * @param int|null $page     The page in the result set to request
      *
      * @return string
      */
-    public function generatePagination(int $page = null, int $page_size = null): string
+    public function generatePagination(int $pageSize = null, int $page = null): string
     {
         return '';
     }
@@ -197,12 +195,12 @@ class LDAP extends DAO
     /**
      * LDAP doesn't support sorting.
      *
-     * @param $column
-     * @param $prepend
+     * @param array       $columns
+     * @param string|null $prepend
      *
      * @return string
      */
-    public function generateSort(array $column, ?string $prepend = null): string
+    public function generateSort(array $columns, ?string $prepend = null): string
     {
         return '';
     }
@@ -210,9 +208,9 @@ class LDAP extends DAO
     /**
      * Returns the handle for use in LDAP connections
      *
-     * @return resource
+     * @return Connection|null
      */
-    public function getHandle()
+    public function getHandle(): ?Connection
     {
         return $this->handle;
     }
@@ -283,7 +281,7 @@ class LDAP extends DAO
      *
      * @param string $queryString The query
      *
-     * @return ResultSet
+     * @return ResultSet|null
      */
     public function getStatement(string $queryString): ?ResultSet
     {
@@ -301,9 +299,6 @@ class LDAP extends DAO
      */
     protected function validateConfiguration(array $config): bool
     {
-        if (!is_array($config)) {
-            throw new DatabaseConnectionException('Could not load LDAP configuration settings.');
-        }
         $config_keys = array_keys($config);
         $missing = array_diff(['server', 'port'], $config_keys);
         if (count($missing) > 0) {

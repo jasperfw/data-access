@@ -26,15 +26,14 @@ class MySQL extends DAO
     /** @var PDO connection to server */
     protected $dbconn;
     /** @var null|ResultSetPDO Returned query results */
-    protected $stmt;
+    protected ?ResultSet $stmt;
 
     /**
      * MySQL constructor.
      *
-     * @param array           $config
-     * @param LoggerInterface $logger
+     * @param array                $config
+     * @param LoggerInterface|null $logger
      *
-     * @throws DatabaseConnectionException
      */
     public function __construct(array $config, LoggerInterface $logger = null)
     {
@@ -203,7 +202,7 @@ class MySQL extends DAO
      *
      * @return int
      */
-    public function lastInsertId(string $name = null): int
+    public function lastInsertId(string $name = null): ?int
     {
         return $this->dbconn->lastInsertId($name);
     }

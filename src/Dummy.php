@@ -195,7 +195,7 @@ class Dummy extends DAO
      *
      * @return int 30. For testing purposes, its 30.
      */
-    public function lastInsertId(): int
+    public function lastInsertId(): ?int
     {
         return 30;
     }
@@ -269,7 +269,7 @@ class Dummy extends DAO
      * Checks the configuration array for required elements. Since this dummy class doesn't actually connect to anything
      * there are no required configuration fields.
      *
-     * @param $config
+     * @param array $config
      *
      * @return bool
      */

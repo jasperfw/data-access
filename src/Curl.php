@@ -32,7 +32,7 @@ class Curl
      *
      * @return bool
      */
-    public function setopt(string $name, $value): bool
+    public function setopt(string $name, mixed $value): bool
     {
         return curl_setopt($this->ch, $name, $value);
     }
@@ -40,9 +40,9 @@ class Curl
     /**
      * Execute the CURL request
      *
-     * @return mixed
+     * @return string|bool
      */
-    public function exec()
+    public function exec(): string|bool
     {
         return curl_exec($this->ch);
     }

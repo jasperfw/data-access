@@ -4,6 +4,7 @@ namespace JasperFW\DataAccess\ResultSet;
 
 use JasperFW\DataAccess\DAO;
 use JasperFW\DataAccess\Exception\DatabaseQueryException;
+use JetBrains\PhpStorm\Pure;
 use PDO;
 use PDOStatement;
 use Psr\Log\LoggerInterface;
@@ -22,7 +23,7 @@ class ResultSetPDO extends ResultSet
      * @param DAO                  $dbc
      * @param null|LoggerInterface $logger
      */
-    public function __construct(PDOStatement $object, DAO $dbc, ?LoggerInterface $logger = null)
+    #[Pure] public function __construct(PDOStatement $object, DAO $dbc, ?LoggerInterface $logger = null)
     {
         parent::__construct($object, $dbc, $logger);
         $this->result = $object;
@@ -85,7 +86,7 @@ class ResultSetPDO extends ResultSet
      *
      * @return array|bool Returns the current result row.
      */
-    public function fetch()
+    public function fetch(): array|bool
     {
         return $this->result->fetch(PDO::FETCH_ASSOC);
     }
