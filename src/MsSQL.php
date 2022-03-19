@@ -9,6 +9,7 @@ use JasperFW\DataAccess\Exception\TransactionErrorException;
 use JasperFW\DataAccess\Exception\TransactionsNotSupportedException;
 use JasperFW\DataAccess\ResultSet\ResultSet;
 use JasperFW\DataAccess\ResultSet\ResultSetPDO;
+use JetBrains\PhpStorm\Pure;
 use PDO;
 use PDOException;
 use PDOStatement;
@@ -23,8 +24,8 @@ use Psr\Log\LoggerInterface;
  */
 class MsSQL extends DAO
 {
-    /** @var PDO connection to server */
-    protected PDO $dbconn;
+    /** @var PDO|null connection to server */
+    protected ?PDO $dbconn;
     /** @var ResultSetPDO|null Returned query object */
     protected ?ResultSet $stmt = null;
     /** @var bool True if the last query attempted succeeded */
@@ -122,7 +123,7 @@ class MsSQL extends DAO
         }
         try {
             return $this->dbconn->beginTransaction();
-        } catch (PDOException $exception) {
+        } catch (PDOException) {
             throw new TransactionsNotSupportedException("Transactions are not supported in this database.");
         }
     }
@@ -183,7 +184,7 @@ class MsSQL extends DAO
      *
      * @return bool True if the last query worked.
      */
-    public function querySucceeded(): bool
+    #[Pure] public function querySucceeded(): bool
     {
         return $this->stmt->querySucceeded();
     }
@@ -216,7 +217,7 @@ class MsSQL extends DAO
      *
      * @param null|string $name The name of the table
      *
-     * @return int
+     * @return int|null
      */
     public function lastInsertId(string $name = null): ?int
     {

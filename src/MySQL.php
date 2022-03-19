@@ -9,6 +9,7 @@ use JasperFW\DataAccess\Exception\TransactionErrorException;
 use JasperFW\DataAccess\Exception\TransactionsNotSupportedException;
 use JasperFW\DataAccess\ResultSet\ResultSet;
 use JasperFW\DataAccess\ResultSet\ResultSetPDO;
+use JetBrains\PhpStorm\Pure;
 use PDO;
 use PDOException;
 use PDOStatement;
@@ -23,8 +24,8 @@ use Psr\Log\LoggerInterface;
  */
 class MySQL extends DAO
 {
-    /** @var PDO connection to server */
-    protected $dbconn;
+    /** @var PDO|null connection to server */
+    protected ?PDO $dbconn;
     /** @var null|ResultSetPDO Returned query results */
     protected ?ResultSet $stmt;
 
@@ -60,8 +61,8 @@ class MySQL extends DAO
         $user = $this->configuration['username'];
         $pwd = $this->configuration['password'];
         $options = [PDO::ATTR_PERSISTENT => true, PDO::ATTR_ERRMODE => PDO::ERRMODE_SILENT];
-        if (isset($this->configuration['options'])) {
-            $options = array_merge($options, $this->configuration['options']);
+        if (isset($this->configuration['options']) && is_array($this->configuration['options'])) {
+            $options = $options + $this->configuration['options'];
         }
         try {
             $this->dbconn = new PDO(
@@ -106,7 +107,7 @@ class MySQL extends DAO
         }
         try {
             return $this->dbconn->beginTransaction();
-        } catch (PDOException $exception) {
+        } catch (PDOException) {
             throw new TransactionsNotSupportedException("Transactions are not supported in this database.");
         }
     }
@@ -167,7 +168,7 @@ class MySQL extends DAO
      *
      * @return bool True if the last query worked.
      */
-    public function querySucceeded(): bool
+    #[Pure] public function querySucceeded(): bool
     {
         return $this->stmt->querySucceeded();
     }
@@ -200,7 +201,7 @@ class MySQL extends DAO
      *
      * @param null|string $name The name of the table
      *
-     * @return int
+     * @return int|null
      */
     public function lastInsertId(string $name = null): ?int
     {
