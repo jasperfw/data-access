@@ -44,7 +44,8 @@ class ResultSetPDO extends ResultSet
         $this->logger->info('DB PREPARE: Preparing query.');
         $test_query = $this->result->queryString;
         foreach ($params as $name => $val) {
-            $test_query = str_replace($name, '\'' . str_replace("'", "''", $val) . '\'', $test_query);
+            $tq_val = (!is_null($val)) ? $val : '~NULL~';
+            $test_query = str_replace($name, '\'' . str_replace("'", "''", $tq_val) . '\'', $test_query);
         }
         $this->logger->info('DB QUERY: ' . $this->result->queryString);
         $this->result->execute($params);
